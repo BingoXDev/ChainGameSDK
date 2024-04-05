@@ -1,0 +1,665 @@
+## 約定
+
+- 資料格式 Json
+
+- 資料編碼 utf8
+
+- 加密方式 md5
+
+## bgcpay.user.query(統一收單交易查詢)
+
+### 公共請求參數
+
+[前往查看](./公共請求參數.md)
+
+### 業務請求參數
+
+以下參數 二選一 傳入
+
+- user_cid string(64)
+
+【描述】鏈付用戶的CID。 
+user_cid,email 如果同時存在優先取user_cid
+
+【示例值】BJGv1jeHA8QxZ5jjwY8wc4PQ2GHg4772L8
+
+- email string(64)
+
+【描述】鏈付用戶的郵箱地址。
+
+【示例值】test@gmail.com
+
+### 常見請求示例
+
+```sh
+curl 'https://openapi.bgcpay.com/gateway.do?charset=UTF-8&method=bgcpay.user.query&format=json&sign=${sign}&app_id=${appid}&version=1.0&sign_type=MD5&timestamp=${now}' \
+ -F 'biz_content={
+	"user_cid":"BJGv1jeHA8QxZ5jjwY8wc4PQ2GHg4772L8",
+	"email":"test@gmail.com"
+}' 
+```
+
+### 公共回應參數
+
+[前往查看](./公共回應參數.md)
+
+### 業務回應參數
+
+user_cid 必選 string(64)
+【描述】鏈付用戶的CID
+【示例值】BJGv1jeHA8QxZ5jjwY8wc4PQ2GHg4772L8
+
+***
+
+display_name 必選 string(64)
+【描述】使用者顯示名
+【示例值】te*@gmail.com
+
+### 回應示例
+
+```sh
+{
+    "code": "10000",
+    "msg": "Success",
+    "user_cid": "BJGv1jeHA8QxZ5jjwY8wc4PQ2GHg4772L8",
+    "display_name": "te*@gmail.com"
+}
+```
+
+### 公共錯誤碼
+
+[前往查看](./公共錯誤碼.md)
+
+### 業務錯誤碼
+
+|錯誤碼	|錯誤描述	|解決方案|
+| ---	| ---	| --- |
+|ACQ.INVALID_PARAMETER	|參數無效	|檢查請求參數，修改後重新發起請求|
+|ACQ.SYSTEM_ERROR	|系統錯誤	|重新發起請求|
+|ACQ.USER_NOT_EXIST	|查詢的用戶不存在	|檢查傳入的用戶CID或郵箱是否正確，修改後重新發起請求|
+
+
+## bgcpay.trade.pay(統一收單交易支付介面)
+
+### 公共請求參數
+
+[前往查看](./公共請求參數.md)
+
+### 業務請求參數
+
+out_trade_no 必選 string(64)
+
+【描述】商戶訂單號。
+
+由商家自訂，64個字元以內，僅支援字母、數位、底線且需保證在商戶端不重複。
+
+【示例值】20150320010101001
+
+***
+
+currency 必選 string(64)
+
+【描述】貨幣單位。
+
+數位資產標識。
+
+【示例值】USDT、AEDB。
+
+***
+
+total_amount 必選 decimal(18,2)
+
+【描述】訂單總金額。
+
+精確到小數點後兩位，取值範圍：[0.01,100000000] 。
+
+【示例值】88.88
+
+***
+
+subject 必選 string(256)
+
+【描述】訂單標題。
+
+注意：不可使用特殊字元，如 /，=，& 等。
+
+【示例值】Iphone6 16G
+
+***
+
+extend_params 可選 text
+
+【描述】商戶透傳擴展資訊
+
+***
+
+timeout 可選 int(11)
+
+【描述】多少秒後過期
+【示例值】2014-07-24 03:07:50
+
+### 常見請求示例
+
+```sh
+curl 'https://openapi.bgcpay.com/gateway.do?charset=UTF-8&method=bgcpay.trade.pay&format=json&sign=${sign}&app_id=${appid}&version=1.0&sign_type=MD5&timestamp=${now}' \
+ -F 'biz_content={
+	"out_trade_no":"20150320010101001",
+	"currency":"USDT",
+	"total_amount":"88.88",
+	"subject":"Iphone6 16G"
+}'
+```
+
+### 公共回應參數
+
+[前往查看](./公共回應參數.md)
+
+### 業務回應參數
+
+trade_no 必選 string(64)
+
+【描述】鏈付帳單號
+
+【示例值】2013112011001004330000121536
+
+***
+
+out_trade_no 必選 string(64)
+【描述】商戶訂單號
+【示例值】6823789339978248
+
+### 回應示例
+
+```sh
+{
+    "bgcpay_trade_pay_response": {
+        "code": "10000",
+        "msg": "Success",
+        "trade_no": "2013112011001004330000121536",
+        "out_trade_no": "6823789339978248"
+    },
+    "sign": "ERITJKEIJKJHKKKKKKKHJEREEEEEEEEEEE"
+}
+```
+
+### 公共錯誤碼
+
+[前往查看](./公共錯誤碼.md)
+
+### 業務錯誤碼
+
+|錯誤碼	|錯誤描述	|解決方案|
+| --- 	| --- 	| --- |
+|ACQ.ACCESS_FORBIDDEN	|無許可權使用介面	|未簽約對應的產品合約； 1、請校驗傳入的product_code參數是否正確； 2、確認請求商戶是否簽約了對應的產品合約；|
+|ACQ.CURRENCY_NOT_SUPPORT	|訂單幣種不支援	|請檢查是否簽約對應的幣種|
+|ACQ.TOTAL_FEE_EXCEED	|訂單總金額超過限額	|請修改訂單金額後重新發起支付請求。|
+|ACQ.INVALID_PARAMETER	|參數無效	|請根據介面返回的錯誤資訊，檢查請求參數，修改後重新發起請求|
+|ACQ.MISSING_PARAMETER	|參數缺失	|請根據介面返回的錯誤資訊，檢查請求參數，修改後重新發起請求|
+|ACQ.MERCHANT_PERM_RECEIPT_SUSPEND_LIMIT	|商戶暫停收款	|聯繫客服人員|
+|ACQ.SYSTEM_ERROR	|系統異常	|系統異常錯誤下該筆交易可能成功也可能失敗，請調用查詢訂單API，查詢當前訂單的狀態，並根據訂單狀態決定下一步的操作，如果多次調用依然報此錯誤碼，請聯繫鏈付客服|
+|ACQ.TRADE_HAS_EXIST	|交易已存在	|請確認該訂單號是否重複支付，如果是新訂單，請更換商戶訂單號後重新提交支付。|
+
+### 觸發通知類型
+
+|通知類型	|描述	|默認開啟|
+| ---	| ---	| --- |
+|tradeStatus.TRADE_CLOSED	|交易關閉	|0|
+|tradeStatus.TRADE_FINISHED	|交易完結	|0|
+|tradeStatus.TRADE_SUCCESS	|支付成功	|1|
+|tradeStatus.WAIT_PAY	|交易創建	|0|
+
+### 通知推送示例
+
+```sh
+curl '[notify_url]?charset=UTF-8&method=alipay.trade.notify&format=json&sign=${sign}&app_id=demo1&version=1.0&sign_type=MD5&timestamp=2014-07-24%2003%3A07%3A05' \
+-F 'trade_no=2013112011001004330000121536'
+-F 'out_trade_no=6823789339978248'
+-F 'currency=USDT'
+-F 'total_amount=188.00'
+-F 'subject=Iphone6 16G'
+-F 'extend_params='
+-F 'payer_id=Bwewqwi2w932wwxadf22ddaawwxadf22dc'
+-F 'trade_status=TRADE_SUCCESS'
+-F 'trade_date=2014-07-24 03:05:50'
+-F 'pay_date=2014-07-24 03:07:05'
+```
+
+### 商戶伺服器回應回檔
+
+- 鏈付在玩家支付後，首次在30秒內推送結果，失敗後第二次間隔1分鐘，第三次間隔1分30秒，依次類推，最多推送100次後便不再推送。
+
+- 商戶伺服器在成功處理鏈付的結果通知後，應該返回"SUCCESS"字串。
+
+## bgcpay.trade.query(統一收單交易查詢)
+
+### 公共請求參數
+
+[前往查看](./公共請求參數.md)
+
+### 業務請求參數
+
+以下參數 二選一 傳入
+
+- out_trade_no string(64)
+
+【描述】訂單支付時傳入的商戶訂單號,和鏈付帳單號不能同時為空。 
+trade_no,out_trade_no如果同時存在優先取trade_no
+
+【示例值】20150320010101001
+
+- trade_no string(64)
+
+【描述】鏈付帳單號，和商戶訂單號不能同時為空
+
+【示例值】2014112611001004680 073956707
+
+### 常見請求示例
+
+```sh
+curl 'https://openapi.bgcpay.com/gateway.do?charset=UTF-8&method=bgcpay.trade.query&format=json&sign=${sign}&app_id=${appid}&version=1.0&sign_type=MD5&timestamp=${now}' \
+ -F 'biz_content={
+	"out_trade_no":"20150320010101001",
+	"query_options":[
+		"trade_settle_info"
+	],
+	"trade_no":"2014112611001004680 073956707"
+}' 
+```
+
+### 公共回應參數
+
+[前往查看](./公共回應參數.md)
+
+### 業務回應參數
+
+trade_no 必選 string(64)
+【描述】鏈付帳單號
+【示例值】2013112011001004330000121536
+
+***
+
+out_trade_no 必選 string(64)
+【描述】商家訂單號
+【示例值】6823789339978248
+
+***
+
+currency 必選 string(64)
+
+【描述】貨幣單位。
+【示例值】USDT。
+
+***
+
+total_amount 必選 decimal(18,2)
+【描述】交易的訂單金額，單位為元，兩位元小數。該參數的值為支付時傳入的total_amount
+【示例值】88.88
+
+***
+
+payer_id 必選 string(100)
+【描述】付款人鏈付帳號
+【示例值】59****5620
+
+***
+
+trade_status 必選 string(32)
+【描述】交易狀態：WAIT_BUYER_PAY（交易創建，等待買家付款）、TRADE_CLOSED（未付款交易超時關閉，或支付完成後全額退款）、TRADE_SUCCESS（交易支付成功）、TRADE_FINISHED（交易結束，不可退款）
+【示例值】TRADE_CLOSED
+
+***
+
+subject 必選 string(256)
+
+【描述】訂單標題。
+
+注意：不可使用特殊字元，如 /，=，& 等。
+
+【示例值】Iphone6 16G
+
+***
+
+extend_params 可選 text
+
+【描述】商戶透傳擴展資訊
+
+***
+
+trade_date 可選 date(32)
+【描述】帳單創建時間
+【示例值】2014-11-27 15:45:57
+
+***
+
+pay_date 可選 date(32)
+【描述】本次交易完成支付的時間
+【示例值】2014-11-27 15:45:57
+
+### 回應示例
+
+```sh
+{
+    "code": "10000",
+    "msg": "Success",
+    "trade_no": "2013112011001004330000121536",
+    "out_trade_no": "6823789339978248",
+    "payer_id": "2088102122524333",
+    "trade_status": "TRADE_CLOSED",
+    "currency": "USDT",
+    "total_amount": "88.88",
+    "trade_date": "2014-11-27 15:45:57",
+    "pay_date": "2014-11-27 15:48:57",
+    "subject": "Iphone6 16G",
+    "extend_params": null
+}
+```
+
+### 公共錯誤碼
+
+[前往查看](./公共錯誤碼.md)
+
+### 業務錯誤碼
+
+|錯誤碼	|錯誤描述	|解決方案|
+| ---	| ---	| --- |
+|ACQ.INVALID_PARAMETER	|參數無效	|檢查請求參數，修改後重新發起請求|
+|ACQ.SYSTEM_ERROR	|系統錯誤	|重新發起請求|
+|ACQ.TRADE_NOT_EXIST	|查詢的交易不存在	|檢查傳入的交易號是否正確，修改後重新發起請求|
+
+
+## bgcpay.fund.trans.uni.transfer(單筆轉帳介面)
+
+### 公共請求參數
+
+[前往查看](./公共請求參數.md)
+
+### 業務請求參數
+
+out_biz_no 必選 string(64)
+【描述】商家側唯一訂單號，由商家自訂。對於不同轉帳請求，商家需保證該訂單號在自身系統唯一。
+【示例值】201806300001
+
+***
+
+currency 必選 string(64)
+
+【描述】貨幣單位。
+【示例值】USDT。
+
+***
+
+trans_amount 必選 price(20)
+【描述】訂單總金額，單位為元，不支援千位分隔符號，精確到小數點後兩位，取值範圍[0.1,100000000]。
+【示例值】23.00
+
+***
+
+order_title 必選 string(128)
+【描述】轉帳業務的標題，用於在鏈付使用者的帳單裡顯示。
+【示例值】201905代發
+
+***
+
+payee_did 必選 string(128)
+【描述】收款方資訊
+【示例值】59****5620
+
+***
+
+remark可選string(200)
+【描述】業務備註。
+【示例值】201905代發
+
+### 公共回應參數
+
+[前往查看](./公共回應參數.md)
+
+### 業務回應參數
+
+out_biz_no 必選 string(64)
+【描述】商戶訂單號
+【示例值】201808080001
+
+***
+
+order_id 必選 string(32)
+【描述】鏈付轉帳訂單號
+【示例值】20190801110070000006380000250621
+
+***
+
+trans_date 必選 string(30)
+【描述】訂單支付時間，格式為yyyy-MM-dd HH:mm:ss
+【示例值】2019-08-21 00:00:00
+
+### 公共錯誤碼
+
+[前往查看](./公共錯誤碼.md)
+
+### 業務錯誤碼
+
+|錯誤碼	|錯誤描述	|解決方案|
+| ---	| ---	| --- |
+|SYSTEM_ERROR	|系統繁忙	|可能發生了網路或者系統異常，導致無法判定準確的轉帳結果。|
+|INVALID_PARAMETER	|參數有誤參數有誤參數有誤	|請根據入參說明檢查請求參數合法性。|
+|AUTHOREE_IS_NOT_MATCH	|參數錯誤，無法操作當前入參帳戶，請檢查相關協定資訊	|檢查協定與收付款方主體關係，確認參數後重試|
+|BALANCE_IS_NOT_ENOUGH	|餘額不足，建議儘快充值。後續可登錄電腦端鏈付，自主設置餘額預警提醒功能。	|請更換付款方或者充值後再重試|
+|BIZ_UNIQUE_EXCEPTION	|商戶訂單號衝突。	|商戶訂單號衝突。|
+|BLOCK_USER_FORBBIDEN_RECIEVE	|帳戶異常被凍結，無法收款。| |
+|BLOCK_USER_FORBBIDEN_SEND	|該帳戶被凍結，暫不可將資金轉出。	| |
+|CURRENCY_NOT_SUPPORT	|幣種不支持	請查詢簽約是否涵蓋請求幣種，目前用於結匯入境場景| |
+|EXCEED_LIMIT_DC_RECEIVED	|收款方單日收款筆數超限	|收款方向同一個付款用戶每日只能收款固定的筆數，超限後請讓用戶第二天再收。|
+|EXCEED_LIMIT_DM_AMOUNT	|日累計額度超限	| |
+|EXCEED_LIMIT_DM_MAX_AMOUNT	|超出單日轉帳限額 | |
+|EXCEED_LIMIT_ENT_SM_AMOUNT	|轉帳給用戶超過單筆限額 | |
+|EXCEED_LIMIT_MM_AMOUNT	|月累計金額超限	| |
+|EXCEED_LIMIT_MM_MAX_AMOUNT	|超出單月轉帳限額 | |
+|EXCEED_LIMIT_PERSONAL_SM_AMOUNT	|超出轉帳給個人鏈付帳戶的單筆限額	| |
+|EXCEED_LIMIT_SM_AMOUNT	|單筆額度超限	請根據接入文檔檢查amount欄位| |
+|EXCEED_LIMIT_SM_MIN_AMOUNT	|請求金額不能低於0.1元	|請修改轉帳金額。|
+|EXCEED_LIMIT_UNRN_DM_AMOUNT	|收款帳戶未實名，超出其單日收款限額	|收款帳戶未實名，超出其單日收款限額|
+
+
+## bgcpay.fund.trans.common.query(轉帳業務單據查詢介面)
+
+### 公共請求參數
+
+[前往查看](./公共請求參數.md)
+
+### 業務請求參數
+
+out_biz_no 可選 string[0,64]
+
+【描述】商戶轉帳唯一訂單號，發起轉帳來源方定義的轉帳單據ID。 本參數和order_id（鏈付轉帳單據號）兩者不能同時為空。 當兩者同時傳入時，將用order_id（鏈付轉帳單據號）進行查詢。
+【示例值】201808080001
+
+***
+
+order_id 可選 string[0,32]
+
+【描述】鏈付轉帳單據號。 本參數和out_biz_no（商戶轉帳唯一訂單號）兩者不能同時為空。 當兩者同時傳入時，將用order_id（鏈付轉帳單據號）進行查詢。
+【示例值】20190801110070000006380000250621
+
+### 常見請求示例
+
+
+### 公共回應參數
+
+[前往查看](./公共回應參數.md)
+
+### 業務回應參數
+
+order_id 必選 string(32)
+【描述】鏈付轉帳單據號，查詢失敗不返回。
+【示例值】20190801110070000006380000250621
+
+***
+
+out_biz_no 必選 string(64)
+【描述】商戶訂單號
+【示例值】201808080001
+
+***
+
+currency 必選 string(64)
+
+【描述】貨幣單位。
+【示例值】USDT。
+
+***
+
+trans_amount 必選 price(16)
+【描述】付款金額，精確到小數點後兩位。
+【示例值】32.00
+
+***
+
+trans_date 必選 string(20)
+【描述】轉帳時間，格式為yyyy-MM-dd HH:mm:ss。
+【示例值】2013-01-01 08:08:08
+
+***
+
+payee_did 必選 string(64)
+【描述】收款人CID。
+【示例值】BJGv1jeHA8QxZ5jjwY8wc4PQ2GHg4772L8
+
+
+### 回應示例
+
+
+
+### 公共錯誤碼
+
+[前往查看](./公共錯誤碼.md)
+
+### 業務錯誤碼
+
+|錯誤碼	|錯誤描述	|解決方案|
+| ---	| ---	| --- |
+|SYSTEM_ERROR	|系統繁忙	|伺服器異常| 可能發生了網路或者系統異常，導致服務調用失敗，商戶可以用同樣的請求發起重試
+|INVALID_PARAMETER	|參數有誤	|請根據介面返回的參數非法的具體錯誤資訊，修改參數後進行重試|
+|NO_ORDER_PERMISSION	|當前操作用戶沒有該筆單據的操作許可權	|聯繫客服|
+|ORDER_NOT_EXIST	|轉帳訂單不存在	|轉帳訂單不存在的原因,可能是轉帳還在處理中,也可能是轉帳處理失敗,導致轉帳訂單沒有落地。商戶首先需要檢查該訂單號是否確實是自己發起的, 如果確認是自己發起的轉帳訂單,請不要直接當作轉帳失敗處理,請隔幾分鐘再嘗試查詢,或者通過相同的 out_biz_no 再次發起轉帳。如果誤把還在轉帳處理中的訂單直接當轉帳失敗處理,商戶自行承擔因此而產生的所有損失。|
+
+
+## 簽名
+
+開發者可通過 簽名 功能手動進行加簽操作。生成 簽名（sign）後，開發者可與自己代碼中請求生成的資訊進行對比，瞭解資料是否正確。
+
+### 加簽原理
+
+1. 獲取所有鏈付開放平臺的 post 內容，不包括位元組類型參數，如檔、位元組流，剔除 sign 欄位，剔除值為空的參數；
+2. 按照第一個字元的鍵值 ASCII 碼遞增排序（字母昇冪排序），如果遇到相同字元則按照第二個字元的鍵值 ASCII 碼遞增排序，以此類推；
+3. 將排序後的參數與其對應值，組合成 參數=參數值 的格式，並且把這些參數用 & 字元連接起來，此時生成的字串為待簽名字串。
+
+### 請求參數
+
+打開 金鑰工具，左側巡覽列選擇 簽名，輸入傳入開放平臺的 post 內容（不包括位元組類型參數，如檔、位元組流，剔除 sign 欄位，剔除值為空的參數）。
+
+注意：若使用 公開金鑰證書 模式簽名，在拼接待簽名字串時需添加解析出來的 應用公開金鑰證書 SN（app_cert_sn）和 鏈付根證書 SN（bgcpay_root_cert_sn）。
+
+### 示例
+timestamp=2019-01-01 08:09:33&method=bgcpay.trade.create
+&app_id=20135234674&sign_type=MD5&biz_content={"total_amount":"10.08", "buyer_id":"2088123456781234", "discount_amount":""}
+
+### 參數說明
+
+|配置參數|描述|示例值|
+| --- | --- | --- |
+|appid|APPID 創建應用後生成。|2021*********807|
+|method|介面名稱|bgcpay.trade.create|
+|charset|請求和簽名使用的字元編碼格式，支援 GBK 和 UTF-8。|實際開發編碼配置。|
+|format|參數返回格式，只支持 JSON。|JSON|
+|sign_type|商家生成簽名字串所使用的簽名演算法類型，目前支援 MD5。|MD5|
+|biz_content|請求參數的集合，最大長度不限，除公共參數外所有請求參數都必須放在這個參數中傳遞，具體參照各產品快速接入文檔。|-|
+
+### 應用私密金鑰
+
+開發者需填入應用私密金鑰。
+
+### 字元集
+
+MD5 簽名支持字元集 UTF-8。
+
+### 簽名方式
+
+新建應用請務必使用支援 MD5 即 2048 位。（目前已使用 RSA 金鑰長度即 1024 位金鑰長度的應用仍然可以正常調用介面，詳情可查看 開放平臺介面簽名方式升級
+
+### 公共請求參數
+
+|參數	|類型	|是否必選	|最大長度	|描述	|示例值|
+|---	|---	|---	|---	|---	|---|
+|app_id	|String	|必選	|32	|鏈付分配給開發者的應用ID|2014072300007148|
+|method	|String	|必選	|128	|介面名稱|bgcpay.trade.query|
+|format	|String	|可選	|40	|僅支持JSON |JSON|
+|charset	|String	|可選	|10	|請求使用的編碼格式，僅支援utf-8|UTF-8|
+|sign_type	|String	|可選	|10	|商戶生成簽名字串所使用的簽名演算法類型，目前支援md5 |MD5|
+|sign	|String	|必選	|344	|商戶請求參數的簽名串，詳見簽名|詳見示例|
+|timestamp	|String	|必選	|19	|發送請求的時間，格式"yyyy-MM-dd HH:mm:ss"|2014-07-24 03:07:50|
+|version	|String	|可選	|3	|調用的介面版本，固定為：1.0|1.0|
+|lang	|String	|可選	|10	|顯示語言，語文、簡體中文、繁體中文分別為：en、zh-Hans、zh-Hant|en|
+|notify_url	|String	|可選	|256	|鏈付伺服器主動通知商戶伺服器裡指定的頁面http/https路徑。|http://api.test.bgcpay.net/atinterface/receive_notify.htm|
+|return_url	|String	|可選	|256	|鏈付H5支付介面返回到的商戶指定的頁面http/https路徑。|http://api.test.bgcpay.net/atinterface/success.htm|
+|biz_content	|String	|必選	|	|業務請求參數的集合，最大長度不限，除公共參數外所有請求參數都必須放在這個參數中傳遞，具體參照各產品快速接入文檔|    |
+
+
+### 公共回應參數
+
+|參數	|類型	|是否必選	|最大長度	|描述	|示例值|
+| --- 	| --- 	| --- 	| --- 	| --- 	| --- |
+|code	|String	|必選	|-|	|閘道返回碼,詳見文檔|40004|
+|msg	|String	|必選	|-|	|閘道返回碼描述,詳見文檔|Business Failed|
+|sub_code	|String	|可選	|-|	|業務返回碼，參見具體的API介面文檔|ACQ.TRADE_HAS_SUCCESS|
+|sub_msg	|String	|可選	|-|	|業務返回碼描述，參見具體的API介面文檔|交易已被支付|
+|sign	|String	|必選	|-|	|簽名,詳見文檔|DZXh8eeTuAHoYE3w1J+POiPhfDxOYBfUNn1lkeT/V7P4zJdyojWEa6IZs6Hz0yDW5Cp/viufUb5I0/V5WENS3OYR8zRedqo6D+fUTdLHdc+EFyCkiQhBxIzgngPdPdfp1PIS7BdhhzrsZHbRqb7o4k3Dxc+AAnFauu4V6Zdwczo=|
+
+
+## 公共錯誤碼
+
+鏈付閘道會對開發者的介面非業務調用錯誤做統一處理，返回碼如下：
+
+### API 公共錯誤碼
+
+注意：
+下表為公共錯誤碼。開發者在接入過程中遇到其他報錯資訊，可以參考所調用介面的 API 文檔的 業務錯誤碼 部分。
+服務商許可權不足問題請參考 ISV 許可權不足常見問題及解決辦法。
+
+|code（返回碼）|msg（返回碼描述）|sub_code（明細返回碼）|sub_msg（明細返回碼描述）|解決方案|
+| --- | --- | --- | --- | --- |
+|10000|介面調用成功，調用結果請參考具體的 API 所對應的業務返回參數。|-|-|-|
+|20000|服務不可用|isp.unknow-error|服務暫不可用（業務系統不可用）|稍後重試|
+|-|-|aop.unknow-error|服務暫不可用（閘道自身的未知錯誤）|稍後重試|
+|-|-|aop.invalid-app-auth-token-no-api|商戶未授權當前介面|請重新授權獲取新的應用授權權杖|
+|40001|缺少必選參數|isv.missing-method|缺少方法名參數|請求參數裡面必須要有 method 參數|
+|-|-|isv.missing-signature|缺少簽名參數|檢查請求參數，缺少 sign 參數|
+|-|-|isv.missing-signature-type|缺少簽名類型參數|檢查請求參數，缺少 sign_type 參數|
+|-|-|isv.missing-signature-key|缺少簽名配置|key為空|
+|-|-|isv.missing-app-id|缺少appId參數|檢查請求參數，缺少 appId 參數|
+|-|-|isv.missing-timestamp|缺少時間戳記參數|檢查請求參數，缺少 timestamp 參數|
+|-|-|isv.missing-version|缺少版本參數|檢查請求參數，缺少 version 參數|
+|40002|非法的參數|isv.invalid-parameter|參數無效|檢查參數，格式不對、非法值、越界等|
+|-|-|isv.invalid-format|無效的資料格式|檢查入參 format，目前只支援 JSON 和 XML 2種格式|
+|-|-|isv.invalid-signature-type|無效的簽名類型|檢查入參 sign_type，目前只支持 RSA、MD5、HMAC_SHA1。|
+|-|-|isv.invalid-signature|無效簽名|- 公私密金鑰是否是一對 - 檢查公開金鑰上傳是否與私密金鑰匹配 - 存在中文需要做 urlencode - 簽名演算法是否無誤|
+|-|-|isv.invalid-app-id|無效的appId參數|檢查入參 app_id，app_id 不存在，或者未上線。|
+|-|-|isv.invalid-timestamp|非法的時間戳記參數|時間戳記參數 timestamp 非法，請檢查格式需要為"yyyy-MM-dd HH:mm:ss"|
+|-|-|isv.invalid-charset|字元集錯誤|請求參數 charset 錯誤，目前支援格式：GBK、UTF-8。|
+|-|-|isv.decryption-error-unknown|解密出錯，未知異常|重試|
+|-|-|isv.suspected-attack|可疑的攻擊請求|可查看 自訂參數說明，商家的請求參數中，所有的 key（鏈付關鍵 key 或者商家自己的 key），其對應的 value 中都不應該出現鏈付關鍵key，如 body、subject、service、out_trade_no、seller_id、total_fee 等，否則該類請求將可能被鏈付攔截，請更換相應參數名稱。|
+|-|-|isv.forbidden-api|介面被禁用|介面已被禁用，請查看介面說明|
+|-|-|not-online-app|應用未上線|應用未上線，請在控制台上線應用後調用。|
+|40004|業務處理失敗|對應業務錯誤碼，明細錯誤碼和解決方案請參見具體的 API 說明。|-|-|
+|40005|Call Limited（調用頻次超限）|isv.api-call-limited|API調用次數超限，包含調用頻率超限|降低請求併發量|
+|40006|許可權不足|isv.insufficient-isv-permissions|ISV 許可權不足|請檢查配置的帳戶是否有當前介面許可權。|
+
+### SPI 錯誤碼
+
+在調用 SPI 時，外部商戶響應報文中的統一錯誤碼只有兩種：10000 和 40004，具體資訊如下圖所示：
+
+|code（返回碼）|msg（返回碼描述）|sub_code（明細返回碼）|sub_msg（明細返回碼描述）|解決方案|
+| --- | --- | --- | --- | --- |
+|10000|Success（介面調用成功，調用結果請參考具體的 SPI 文檔所對應的業務返回參數）|-|-|-|
+|40004|Business Failed（業務處理失敗）|對應業務錯誤碼，明細錯誤碼和解決方案請參見具體的 SPI 文檔。|-|-|
+
+
